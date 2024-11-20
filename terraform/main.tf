@@ -3,19 +3,19 @@ provider "aws" {
   region = "us-east-1"  # Specify the AWS region for all resources
 }
 
-# Backend Configuration
-terraform {
-  backend "s3" {
-    bucket = "staefile"  # Replace with your S3 bucket name
-    key    = "path/to/terraform.tfstate"  # Specify the path for the state file in the bucket
-    region = "us-east-1"  # Replace with the region where the S3 bucket will be created
-    encrypt = true        # Enable encryption for the state file (recommended)
-  }
-}
+# # Backend Configuration
+# terraform {
+#   backend "s3" {
+#     bucket = "staefile"  # Replace with your S3 bucket name
+#     key    = "path/to/terraform.tfstate"  # Specify the path for the state file in the bucket
+#     region = "us-east-1"  # Replace with the region where the S3 bucket will be created
+#     encrypt = true        # Enable encryption for the state file (recommended)
+#   }
+# }
 
 # Create S3 Bucket for Terraform State File
 resource "aws_s3_bucket" "state_bucket" {
-  bucket = "statefile"  # Replace with your desired bucket name
+  bucket = "state_bucket"  # Replace with your desired bucket name
   acl    = "private"
 
   tags = {
