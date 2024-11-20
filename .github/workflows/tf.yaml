@@ -6,8 +6,33 @@ on:
       - main
 
 jobs:
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Your Terraform deployment steps go here (e.g., terraform init, terraform apply)
+
   ecs-service-check:
     runs-on: ubuntu-latest
+    needs: terraform-deploy  # Ensures ecs-service-check runs after terraform-deploy
+    
+    env:
+      AWS_REGION: us-east-1
+      AWS_ACCOUNT_ID: 863518440386
+      IMAGE_NAME: zomato
+      ECS_CLUSTER: zomato-cluster
+      ECS_SERVICE: App_Test  # Updated ECS Service name
+      TASK_DEFINITION: room  # Updated Task Definition name
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -19,7 +44,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      # Check if ECS Service is Created
+      # Debug Step: Print out ECS_CLUSTER, ECS_SERVICE, and TASK_DEFINITION
+      - name: Debug ECS Variables
+        run: |
+          echo "ECS_CLUSTER: $ECS_CLUSTER"
+          echo "ECS_SERVICE: $ECS_SERVICE"
+          echo "TASK_DEFINITION: $TASK_DEFINITION"
+
       - name: Check if ECS Service is Created
         run: |
           echo "Checking if the ECS service and tasks are created..."
