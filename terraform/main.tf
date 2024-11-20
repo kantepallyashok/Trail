@@ -1,10 +1,8 @@
-# terraform {
-#   backend "s3" {
-#     bucket = "ashoktf2"  # The name of your S3 bucket
-#     key    = "state/statefile.tfstate"  # Path to the state file in S3
-#     region = "us-east-1"  # The region of your S3 buckets.
-#   }
-# }
+terraform {
+  backend "local" {
+    path = "./terraform.tfstate"
+  }
+}
 
 provider "aws" {
   region = "us-east-1"
