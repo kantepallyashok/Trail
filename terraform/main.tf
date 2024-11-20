@@ -38,7 +38,7 @@ resource "aws_ecs_cluster" "main" {
   }
 }
 
-# S3 Bucket for State
+# S3 Bucket for State.
 resource "aws_s3_bucket" "state_bucket" {
   bucket = "ashok-tf-state-bucket"  # Replace with a valid bucket name
   acl    = "private"
