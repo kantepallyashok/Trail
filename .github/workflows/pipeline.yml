@@ -8,10 +8,10 @@ on:
 env:
   AWS_REGION: us-east-1
   AWS_ACCOUNT_ID: 863518440386
-  IMAGE_NAME: zomato
-  ECS_CLUSTER: zomato-cluster
-  ECS_SERVICE: zomato-service
-  TASK_DEFINITION: Zomato_TASK_Definition
+  IMAGE_NAME: ASHOK_Hotel
+  ECS_CLUSTER: ASHOK_Hotel-cluster
+  ECS_SERVICE: ASHOK_Hotel-service
+  TASK_DEFINITION: ASHOK_Hotel_TASK_Definition
 
 jobs:
   # First Job: Build and Deploy to AWS ECR and ECS
