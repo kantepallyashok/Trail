@@ -1,10 +1,9 @@
 name: Terraform Workflow
 
 on:
-  workflow_run:
-    workflows: ["Build and Deploy to AWS ECR and ECS"] # Name of the main workflow
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
   terraform-deploy:
@@ -37,3 +36,70 @@ jobs:
       - name: Terraform Apply
         run: terraform apply -auto-approve tfplan
         working-directory: ./terraform
+        
+  ecs-service-check:
+    runs-on: ubuntu-latest
+    needs: terraform-deploy  # Ensures the ecs-service-check job runs after terraform-deploy
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      # Check if ECS Service is Created
+      - name: Check if ECS Service is Created
+        run: |
+          echo "Checking if the ECS service and tasks are created..."
+
+          # Check if the ECS service exists and is stable
+          SERVICE_STATUS=$(aws ecs describe-services --cluster $ECS_CLUSTER --services $ECS_SERVICE --query 'services[0].status' --output text)
+
+          if [ "$SERVICE_STATUS" == "ACTIVE" ]; then
+            echo "ECS Service $ECS_SERVICE is created and ACTIVE."
+          else
+            echo "ECS Service $ECS_SERVICE is not yet created or is not ACTIVE."
+            exit 1
+          fi
+
+          # Check if ECS tasks are created for the service
+          TASKS_STATUS=$(aws ecs list-tasks --cluster $ECS_CLUSTER --service-name $ECS_SERVICE --query 'taskArns[0]' --output text)
+          
+          if [ "$TASKS_STATUS" != "None" ]; then
+            echo "ECS task(s) are created for the service."
+          else
+            echo "No ECS tasks created for the service yet."
+            exit 1
+          fi
+
+      # Wait for 90 seconds to allow ECS task to fully start
+      - name: Wait for ECS Tasks to Start
+        run: |
+          echo "Waiting for 90 seconds for the ECS tasks to fully start..."
+          sleep 90
+
+      # Retrieve the Network Bindings and IP Address of the ECS Task
+      - name: Retrieve ECS Task Network Bindings and IP Address
+        run: |
+          # Get the task ARN
+          TASK_ARN=$(aws ecs list-tasks --cluster $ECS_CLUSTER --service-name $ECS_SERVICE --query 'taskArns[0]' --output text)
+
+          # Get the network interface ID from the task
+          TASK_NETWORK_INTERFACE=$(aws ecs describe-tasks --cluster $ECS_CLUSTER --tasks $TASK_ARN --query 'tasks[0].attachments[0].details[?name==`networkInterfaceId`].value' --output text)
+
+          # Retrieve the private IP address from the network interface
+          IP_ADDRESS=$(aws ec2 describe-network-interfaces --network-interface-ids $TASK_NETWORK_INTERFACE --query 'NetworkInterfaces[0].PrivateIpAddress' --output text)
+
+          if [ "$IP_ADDRESS" != "None" ]; then
+            echo "ECS Service IP: $IP_ADDRESS"
+            echo "ECS_IP=$IP_ADDRESS" >> $GITHUB_ENV  # Save IP address for later jobs
+            echo "Service is accessible at: http://$IP_ADDRESS"
+          else
+            echo "No IP address found for the ECS service."
+            exit 1
+          fi
