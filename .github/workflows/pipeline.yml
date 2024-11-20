@@ -1,9 +1,13 @@
-name: Build and Deploy to AWS ECR and ECS
+name: Build, Deploy to AWS ECR, ECS and Terraform Deployment
 
 on:
   push:
     branches:
       - main
+  workflow_run:
+    workflows: ["Build, Deploy to AWS ECR, ECS and Terraform Deployment"]  # Name of this workflow
+    types:
+      - completed
 
 env:
   AWS_REGION: us-east-1
@@ -14,6 +18,7 @@ env:
   TASK_DEFINITION: zomato-task
 
 jobs:
+  # First Job: Build and Deploy to AWS ECR and ECS
   build-and-deploy:
     runs-on: ubuntu-latest
 
@@ -68,3 +73,36 @@ jobs:
       - name: Push Docker image to AWS ECR
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
+
+  # Second Job: Terraform Deployment (runs after the Build and Deploy job)
+  terraform-deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-deploy  # This ensures the Terraform job runs only after the previous one finishes successfully
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # Initialize Terraform
+      - name: Terraform Init
+        run: terraform init
+        working-directory: ./terraform
+
+      # Plan Terraform changes
+      - name: Terraform Plan
+        run: terraform plan -out=tfplan
+        working-directory: ./terraform
+
+      # Apply Terraform changes
+      - name: Terraform Apply
+        run: terraform apply -auto-approve tfplan
+        working-directory: ./terraform
