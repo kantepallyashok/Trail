@@ -80,7 +80,7 @@ jobs:
       - name: Wait for ECS Tasks to Start
         run: |
           echo "Waiting for 90 seconds for the ECS tasks to fully start..."
-          sleep 90
+        #sleep 90
 
       # Retrieve the Network Bindings and IP Address of the ECS Task
       - name: Retrieve ECS Task Public IP Address
