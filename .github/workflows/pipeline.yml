@@ -41,7 +41,6 @@ jobs:
       - name: Get default Subnet IDs
         id: subnet_ids
         run: |
-          # Get Subnet IDs as a space-separated list
           export SUBNET_IDS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID --query 'Subnets[*].SubnetId' --output text --region $AWS_REGION)
           echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
 
@@ -64,15 +63,3 @@ jobs:
       - name: Push Docker image to AWS ECR
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
-
-      # Trigger Terraform Workflow (This step triggers another workflow file)
-      - name: Trigger Terraform Workflow
-        uses: peter-evans/workflow-dispatch@v1
-        with:
-          workflow: tf.yml
-          ref: main
-          inputs: |
-            ENVIRONMENT: "production"
-            IMAGE_NAME: ${{ env.IMAGE_NAME }}
-            AWS_REGION: ${{ env.AWS_REGION }}
-            AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
