@@ -13,7 +13,7 @@ data "aws_vpc" "default" {
   default = true
 }
 
-# Default Subnet
+# Default Subnets
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
