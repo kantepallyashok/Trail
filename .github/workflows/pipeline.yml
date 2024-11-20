@@ -45,7 +45,6 @@ jobs:
           export SUBNET_IDS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID --query 'Subnets[*].SubnetId' --output text --region $AWS_REGION)
           echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
 
-
       # Check if the ECR repository exists, if not create it
       - name: Create ECR Repository if not exists
         run: |
@@ -68,8 +67,12 @@ jobs:
 
       # Trigger Terraform Workflow (This step triggers another workflow file)
       - name: Trigger Terraform Workflow
-        uses: actions/github-script@v6
+        uses: peter-evans/workflow-dispatch@v1
         with:
-          script: |
-            const { execSync } = require('child_process');
-            execSync('gh workflow run tf.yml', { stdio: 'inherit' });
+          workflow: tf.yml
+          ref: main
+          inputs: |
+            ENVIRONMENT: "production"
+            IMAGE_NAME: ${{ env.IMAGE_NAME }}
+            AWS_REGION: ${{ env.AWS_REGION }}
+            AWS_ACCOUNT_ID: ${{ env.AWS_ACCOUNT_ID }}
