@@ -27,7 +27,7 @@ jobs:
     env:
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: 863518440386
-      IMAGE_NAME: ASHOK_Hotel
+      IMAGE_NAME: ashok_hotel
       ECS_CLUSTER: APP_Auto # Updated ECS Cluster name
       ECS_SERVICE: App_Test # ECS Service name
       TASK_DEFINITION: room # Task Definition name

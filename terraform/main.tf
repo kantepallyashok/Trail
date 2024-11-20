@@ -31,8 +31,8 @@ data "aws_security_group" "default" {
 }
 
 # Step 5: ECS Cluster
-resource "aws_ecs_cluster" "ASHOK_Hotel_cluster" {
-  name = "ASHOK_Hotel-cluster"
+resource "aws_ecs_cluster" "ashok_hotel_cluster" {
+  name = "ashok_hotel-cluster"
 
   setting {
     name  = "containerInsights"
@@ -40,13 +40,13 @@ resource "aws_ecs_cluster" "ASHOK_Hotel_cluster" {
   }
 
   tags = {
-    Name = "ASHOK_Hotel-cluster"
+    Name = "ashok_hotel-cluster"
   }
 }
 
 # Step 6: ECS Task Definition
-resource "aws_ecs_task_definition" "ASHOK_Hotel_TASK_Definition" {
-  family                   = "ASHOK_Hotel"
+resource "aws_ecs_task_definition" "ashok_hotel_task_definition" {
+  family                   = "ashok_hotel"
   execution_role_arn       = "arn:aws:iam::863518440386:role/ecsTaskExecutionRole"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -61,12 +61,12 @@ resource "aws_ecs_task_definition" "ASHOK_Hotel_TASK_Definition" {
   container_definitions = <<DEFINITION
 [ 
   {
-    "name": "ASHOK_Hotel",
-    "image": "863518440386.dkr.ecr.us-east-1.amazonaws.com/ASHOK_Hotel:latest",
+    "name": "ashok_hotel",
+    "image": "863518440386.dkr.ecr.us-east-1.amazonaws.com/ashok_hotel:latest",
     "cpu": 0,
     "portMappings": [
       {
-        "name": "ASHOK_Hotel-3000-tcp",
+        "name": "ashok_hotel-3000-tcp",
         "containerPort": 3000,
         "hostPort": 3000,
         "protocol": "tcp",
@@ -86,10 +86,10 @@ DEFINITION
 }
 
 # Step 7: ECS Service
-resource "aws_ecs_service" "ASHOK_Hotel_service" {
-  name            = "ASHOK_Hotel-service"
-  cluster         = aws_ecs_cluster.ASHOK_Hotel_cluster.id
-  task_definition = aws_ecs_task_definition.ASHOK_Hotel_TASK_Definition.arn
+resource "aws_ecs_service" "ashok_hotel_service" {
+  name            = "ashok_hotel-service"
+  cluster         = aws_ecs_cluster.ashok_hotel_cluster.id
+  task_definition = aws_ecs_task_definition.ashok_hotel_task_definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
@@ -104,6 +104,6 @@ resource "aws_ecs_service" "ASHOK_Hotel_service" {
   }
 
   tags = {
-    Name = "ASHOK_Hotel-service"
+    Name = "ashok_hotel-service"
   }
 }

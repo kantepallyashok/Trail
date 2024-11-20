@@ -8,10 +8,10 @@ on:
 env:
   AWS_REGION: us-east-1
   AWS_ACCOUNT_ID: 863518440386
-  IMAGE_NAME: ASHOK_Hotel
-  ECS_CLUSTER: ASHOK_Hotel-cluster
-  ECS_SERVICE: ASHOK_Hotel-service
-  TASK_DEFINITION: ASHOK_Hotel_TASK_Definition
+  IMAGE_NAME: ashok_hotel
+  ECS_CLUSTER: ashok_hotel-cluster
+  ECS_SERVICE: ashok_hotel-service
+  TASK_DEFINITION: ashok_hotel_task_definition
 
 jobs:
   # First Job: Build and Deploy to AWS ECR and ECS

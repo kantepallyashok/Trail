@@ -13,7 +13,7 @@ const Footer = () => {
     <div className="footer">
       <div className="top">
         <div className="top1">
-          <h2>ASHOK_Hotel</h2>
+          <h2>ashok_hotel</h2>
           <div className="lang">
             <select>
               <option value="India">India</option>
@@ -35,7 +35,7 @@ const Footer = () => {
         </div>
         <div className="bottom1">
           <div className="bottomContent">
-            <h4>ABOUT ASHOK_Hotel</h4>
+            <h4>ABOUT ashok_hotel</h4>
             <p>who we are</p>
             <p>blog</p>
             <p>work with us</p>
@@ -45,7 +45,7 @@ const Footer = () => {
           </div>
           <div className="bottomContent">
             <h4>ZOMAVERSE</h4>
-            <p>ASHOK_Hotel</p>
+            <p>ashok_hotel</p>
             <p>Blinkit</p>
             <p>Feeding India</p>
             <p>HyperPure</p>
@@ -56,7 +56,7 @@ const Footer = () => {
             <p>Patner with Us</p>
             <p>Apps For you</p>
             <h4>For Enterprises</h4>
-            <p>ASHOK_Hotel for work</p>
+            <p>ashok_hotel for work</p>
           </div>
           <div className="bottomContent">
             <h4>LEARN MORE</h4>
@@ -84,7 +84,7 @@ const Footer = () => {
         <p>
           By continuing past this page, you agree to our Terms of Service,
           Cookie Policy, Privacy Policy and Content Policies. All trademarks are
-          properties of their respective owners. 2008-2022 © ASHOK_Hotel™ Ltd. All
+          properties of their respective owners. 2008-2022 © ashok_hotel™ Ltd. All
           rights reserved.
         </p>
       </div>
