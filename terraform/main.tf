@@ -31,8 +31,8 @@ data "aws_security_group" "default" {
 }
 
 # Step 5: ECS Cluster
-resource "aws_ecs_cluster" "zomato_cluster" {
-  name = "zomato-cluster"
+resource "aws_ecs_cluster" "ASHOK_Hotel_cluster" {
+  name = "ASHOK_Hotel-cluster"
 
   setting {
     name  = "containerInsights"
@@ -40,13 +40,13 @@ resource "aws_ecs_cluster" "zomato_cluster" {
   }
 
   tags = {
-    Name = "zomato-cluster"
+    Name = "ASHOK_Hotel-cluster"
   }
 }
 
 # Step 6: ECS Task Definition
-resource "aws_ecs_task_definition" "Zomato_TASK_Definition" {
-  family                   = "zomato"
+resource "aws_ecs_task_definition" "ASHOK_Hotel_TASK_Definition" {
+  family                   = "ASHOK_Hotel"
   execution_role_arn       = "arn:aws:iam::863518440386:role/ecsTaskExecutionRole"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -61,12 +61,12 @@ resource "aws_ecs_task_definition" "Zomato_TASK_Definition" {
   container_definitions = <<DEFINITION
 [ 
   {
-    "name": "zomato",
-    "image": "863518440386.dkr.ecr.us-east-1.amazonaws.com/zomato:latest",
+    "name": "ASHOK_Hotel",
+    "image": "863518440386.dkr.ecr.us-east-1.amazonaws.com/ASHOK_Hotel:latest",
     "cpu": 0,
     "portMappings": [
       {
-        "name": "zomato-3000-tcp",
+        "name": "ASHOK_Hotel-3000-tcp",
         "containerPort": 3000,
         "hostPort": 3000,
         "protocol": "tcp",
@@ -86,10 +86,10 @@ DEFINITION
 }
 
 # Step 7: ECS Service
-resource "aws_ecs_service" "zomato_service" {
-  name            = "zomato-service"
-  cluster         = aws_ecs_cluster.zomato_cluster.id
-  task_definition = aws_ecs_task_definition.Zomato_TASK_Definition.arn
+resource "aws_ecs_service" "ASHOK_Hotel_service" {
+  name            = "ASHOK_Hotel-service"
+  cluster         = aws_ecs_cluster.ASHOK_Hotel_cluster.id
+  task_definition = aws_ecs_task_definition.ASHOK_Hotel_TASK_Definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
@@ -104,6 +104,6 @@ resource "aws_ecs_service" "zomato_service" {
   }
 
   tags = {
-    Name = "zomato-service"
+    Name = "ASHOK_Hotel-service"
   }
 }

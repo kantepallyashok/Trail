@@ -13,11 +13,11 @@ RUN npm install
 # Copy the rest of the application code
 COPY . .
 
-# Build the React app
+# Build the Ashok_Hotel
 RUN npm run build
 
 # Expose port 3000 (or the port your app is configured to listen on)
 EXPOSE 3000
 
-# Start your Node.js server (assuming it serves the React app)  
+# Start your Node.js server (assuming it serves the Ashok_Hotel)  
 CMD ["npm", "start"]

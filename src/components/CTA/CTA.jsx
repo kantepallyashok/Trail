@@ -14,7 +14,7 @@ const CTA = () => {
         <img src={Phone} alt="phone" />
       </div>
       <div className="right">
-        <h1>Get the Zomato app</h1>
+        <h1>Get the ASHOK_Hotel app</h1>
         <p>
           We will send you a link, open it on your phone to download the app
         </p>
