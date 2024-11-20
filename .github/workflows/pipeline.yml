@@ -12,8 +12,6 @@ env:
   ECS_CLUSTER: zomato-cluster
   ECS_SERVICE: zomato-service
   TASK_DEFINITION: zomato-task
-  VPC_ID: vpc-0ab1d87e367c4d32b
-  SUBNET_IDS: '["subnet-0b9f589e6ac273269", "subnet-0b09e180ef9f3c96e", "subnet-0d4b1308ddb953a5f"]'
 
 jobs:
   build-and-deploy:
@@ -24,13 +22,31 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Login to AWS ECR.
-      # Step 2: Login to AWS ECR
+      # Login to AWS ECR
       - name: Login to AWS ECR
         uses: aws-actions/amazon-ecr-login@v1
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Get default VPC ID
+      - name: Get default VPC ID
+        id: vpc_id
+        run: |
+          export VPC_ID=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text --region $AWS_REGION)
+          echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
+
+      # Get default subnet IDs for the VPC
+      - name: Get default Subnet IDs
+        id: subnet_ids
+        run: |
+          export SUBNET_IDS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID --query 'Subnets[*].SubnetId' --output json --region $AWS_REGION)
+          echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
+
+      # Check if the ECR repository exists, if not create it
+      - name: Create ECR Repository if not exists
+        run: |
+          aws ecr describe-repositories --repository-names $IMAGE_NAME --region $AWS_REGION || aws ecr create-repository --repository-name $IMAGE_NAME --region $AWS_REGION
 
       # Build Docker image
       - name: Build Docker Image
@@ -47,7 +63,7 @@ jobs:
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
 
-      # Trigger Terraform Workflow
+      # Trigger Terraform Workflow (This step triggers another workflow file)
       - name: Trigger Terraform Workflow
         uses: actions/github-script@v6
         with:
