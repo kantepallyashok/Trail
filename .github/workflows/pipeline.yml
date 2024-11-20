@@ -22,12 +22,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Login to AWS ECR
-      - name: Login to AWS ECR
-        uses: aws-actions/amazon-ecr-login@v1
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # Configure AWS Credentials
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
 
       # Get default VPC ID
       - name: Get default VPC ID
@@ -36,7 +37,7 @@ jobs:
           export VPC_ID=$(aws ec2 describe-vpcs --filters Name=isDefault,Values=true --query 'Vpcs[0].VpcId' --output text --region $AWS_REGION)
           echo "VPC_ID=$VPC_ID" >> $GITHUB_ENV
 
-      # Get default subnet IDs for the VPC
+      # Get default Subnet IDs for the VPC
       - name: Get default Subnet IDs
         id: subnet_ids
         run: |
