@@ -1,8 +1,12 @@
 terraform {
-  backend "local" {
-    path = "./terraform.tfstate"
+  backend "s3" {
+    bucket = "ashoktf2"  # Replace with your S3 bucket name
+    key    = "path/to/terraform.tfstate"  # Specify the path for the state file in the bucket
+    region = "us-east-1"                  # Replace with your desired AWS region
+    encrypt = true                        # Enable encryption for the state file (optional but recommended)
   }
 }
+
 
 provider "aws" {
   region = "us-east-1"
