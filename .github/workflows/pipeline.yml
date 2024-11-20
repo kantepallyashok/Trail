@@ -3,7 +3,7 @@ name: Build and Deploy to AWS ECR and ECS
 on:
   push:
     branches:
-      - master
+      - main
 
 env:
   AWS_REGION: us-east-1
@@ -47,34 +47,10 @@ jobs:
         run: |
           docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
 
-      # Setup Terraform
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
+      # Trigger Terraform Workflow
+      - name: Trigger Terraform Workflow
+        uses: actions/github-script@v6
         with:
-          terraform_version: 1.5.4
-
-      # Terraform Init
-      - name: Terraform Init
-        run: |
-          cd terraform
-          terraform init -backend-config="bucket=my-terraform-state" \
-                         -backend-config="key=terraform/state.tfstate" \
-                         -backend-config="region=$AWS_REGION" \
-                         -backend-config="dynamodb_table=terraform-locks"
-
-      # Terraform Plan
-      - name: Terraform Plan
-        run: |
-          cd terraform
-          terraform plan -var="aws_region=$AWS_REGION" \
-                         -var="ecs_cluster=$ECS_CLUSTER" \
-                         -var="ecs_service=$ECS_SERVICE" \
-                         -var="task_definition=$TASK_DEFINITION" \
-                         -var="image_name=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest" \
-                         -out=tfplan
-
-      # Terraform Apply
-      - name: Terraform Apply
-        run: |
-          cd terraform
-          terraform apply -auto-approve tfplan
+          script: |
+            const { execSync } = require('child_process');
+            execSync('gh workflow run tf.yml', { stdio: 'inherit' });
