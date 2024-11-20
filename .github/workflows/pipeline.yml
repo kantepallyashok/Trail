@@ -4,10 +4,6 @@ on:
   push:
     branches:
       - main
-  workflow_run:
-    workflows: ["Build, Deploy to AWS ECR, ECS and Terraform Deployment"]  # Name of this workflow
-    types:
-      - completed
 
 env:
   AWS_REGION: us-east-1
