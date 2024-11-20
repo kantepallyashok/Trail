@@ -25,14 +25,14 @@ data "aws_subnets" "default" {
   }
 }
 
-#Default Security Group (get the default security group for the default VPC)
+# Default Security Group (get the default security group for the default VPC)
 data "aws_security_group" "default" {
   vpc_id = data.aws_vpc.default.id
 }
 
 # Step 5: ECS Cluster
-resource "aws_ecs_cluster" "main" {
-  name = "APP_Auto"
+resource "aws_ecs_cluster" "zomato_cluster" {
+  name = "zomato-cluster"
 
   setting {
     name  = "containerInsights"
@@ -40,12 +40,13 @@ resource "aws_ecs_cluster" "main" {
   }
 
   tags = {
-    Name = "APP_ECS_Cluster"
+    Name = "zomato-cluster"
   }
 }
 
-resource "aws_ecs_task_definition" "room_task" {
-  family                   = "room"
+# Step 6: ECS Task Definition
+resource "aws_ecs_task_definition" "Zomato_TASK_Definition" {
+  family                   = "zomato"
   execution_role_arn       = "arn:aws:iam::863518440386:role/ecsTaskExecutionRole"
   network_mode             = "awsvpc"
   requires_compatibilities = ["FARGATE"]
@@ -58,14 +59,14 @@ resource "aws_ecs_task_definition" "room_task" {
   }
 
   container_definitions = <<DEFINITION
-[
+[ 
   {
-    "name": "room",
+    "name": "zomato",
     "image": "863518440386.dkr.ecr.us-east-1.amazonaws.com/zomato:latest",
     "cpu": 0,
     "portMappings": [
       {
-        "name": "room-3000-tcp",
+        "name": "zomato-3000-tcp",
         "containerPort": 3000,
         "hostPort": 3000,
         "protocol": "tcp",
@@ -84,11 +85,11 @@ resource "aws_ecs_task_definition" "room_task" {
 DEFINITION
 }
 
-# Step 6: ECS Service
-resource "aws_ecs_service" "app_service" {
-  name            = "App_Test"
-  cluster         = aws_ecs_cluster.main.id
-  task_definition = aws_ecs_task_definition.room_task.arn
+# Step 7: ECS Service
+resource "aws_ecs_service" "zomato_service" {
+  name            = "zomato-service"
+  cluster         = aws_ecs_cluster.zomato_cluster.id
+  task_definition = aws_ecs_task_definition.Zomato_TASK_Definition.arn
   desired_count   = 1
   launch_type     = "FARGATE"
 
@@ -103,6 +104,6 @@ resource "aws_ecs_service" "app_service" {
   }
 
   tags = {
-    Name = "App_Test_Service"
+    Name = "zomato-service"
   }
 }
