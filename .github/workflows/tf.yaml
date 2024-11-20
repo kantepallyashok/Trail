@@ -98,6 +98,9 @@ jobs:
             echo "ECS Service Public IP: $PUBLIC_IP_ADDRESS"
             echo "ECS_PUBLIC_IP=$PUBLIC_IP_ADDRESS" >> $GITHUB_ENV  # Save IP address for later jobs
             echo "Service is accessible at: http://$PUBLIC_IP_ADDRESS"
+            # Directly access the public IP using curl
+            echo "Testing the public IP access..."
+            curl -I http://$PUBLIC_IP_ADDRESS  # Perform a quick HTTP request to the IP
           else
             echo "No public IP address found for the ECS service."
             exit 1
