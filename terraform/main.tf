@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    bucket = "ashok-tf-state-bucket"  # Use a valid S3 bucket name
+    bucket = "ashok-tf-state"  # Use a valid S3 bucket name
     key    = "path/to/terraform.tfstate"
     region = "us-east-1"
     encrypt = true
