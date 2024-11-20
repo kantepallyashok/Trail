@@ -1,16 +1,13 @@
 name: Terraform Workflow
 
 on:
-  push:
-    branches:
-      - main
   pull_request:
     branches:
       - main
 
 jobs:
   terraform:
-    name: infra create for APP
+    name: Infra create for APP
     runs-on: ubuntu-latest
 
     steps:
