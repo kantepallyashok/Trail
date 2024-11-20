@@ -29,9 +29,9 @@ jobs:
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: 863518440386
       IMAGE_NAME: zomato
-      ECS_CLUSTER: zomato-cluster
-      ECS_SERVICE: App_Test  # Updated ECS Service name
-      TASK_DEFINITION: room  # Updated Task Definition name
+      ECS_CLUSTER: APP_Auto  # Updated ECS Cluster name
+      ECS_SERVICE: App_Test  # ECS Service name
+      TASK_DEFINITION: room  # Task Definition name
 
     steps:
       - name: Checkout code
@@ -51,6 +51,7 @@ jobs:
           echo "ECS_SERVICE: $ECS_SERVICE"
           echo "TASK_DEFINITION: $TASK_DEFINITION"
 
+      # Check if ECS Service is Created
       - name: Check if ECS Service is Created
         run: |
           echo "Checking if the ECS service and tasks are created..."
@@ -81,7 +82,7 @@ jobs:
           echo "Waiting for 90 seconds for the ECS tasks to fully start..."
           sleep 90
 
-      # Retrieve the Public IP Address of the ECS Task
+      # Retrieve the Network Bindings and IP Address of the ECS Task
       - name: Retrieve ECS Task Public IP Address
         run: |
           # Get the task ARN
