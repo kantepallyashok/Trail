@@ -29,9 +29,9 @@ jobs:
       AWS_REGION: us-east-1
       AWS_ACCOUNT_ID: 863518440386
       IMAGE_NAME: zomato
-      ECS_CLUSTER: zomato-cluster
-      ECS_SERVICE: App_Test  # Updated ECS Service name
-      TASK_DEFINITION: room  # Updated Task Definition name
+      ECS_CLUSTER: APP_Auto  # Updated ECS Cluster name
+      ECS_SERVICE: App_Test  # ECS Service name
+      TASK_DEFINITION: room  # Task Definition name
 
     steps:
       - name: Checkout code
