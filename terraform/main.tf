@@ -25,6 +25,11 @@ data "aws_subnets" "default" {
   }
 }
 
+#Default Security Group (get the default security group for the default VPC)
+data "aws_security_group" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
+
 # Step 5: ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "APP_Auto"
@@ -36,5 +41,68 @@ resource "aws_ecs_cluster" "main" {
 
   tags = {
     Name = "APP_ECS_Cluster"
+  }
+}
+
+resource "aws_ecs_task_definition" "room_task" {
+  family                   = "room"
+  execution_role_arn       = "arn:aws:iam::863518440386:role/ecsTaskExecutionRole"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "1024"
+  memory                   = "3072"
+
+  runtime_platform {
+    cpu_architecture    = "X86_64"
+    operating_system_family = "LINUX"
+  }
+
+  container_definitions = <<DEFINITION
+[
+  {
+    "name": "room",
+    "image": "863518440386.dkr.ecr.us-east-1.amazonaws.com/zomato:latest",
+    "cpu": 0,
+    "portMappings": [
+      {
+        "name": "room-3000-tcp",
+        "containerPort": 3000,
+        "hostPort": 3000,
+        "protocol": "tcp",
+        "appProtocol": "http"
+      }
+    ],
+    "essential": true,
+    "environment": [],
+    "environmentFiles": [],
+    "mountPoints": [],
+    "volumesFrom": [],
+    "ulimits": [],
+    "systemControls": []
+  }
+]
+DEFINITION
+}
+
+# Step 6: ECS Service
+resource "aws_ecs_service" "app_service" {
+  name            = "App_Test"
+  cluster         = aws_ecs_cluster.main.id
+  task_definition = aws_ecs_task_definition.room_task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+
+  network_configuration {
+    subnets          = data.aws_subnets.default.ids
+    security_groups = [data.aws_security_group.default.id]
+    assign_public_ip = true  # Only for public subnets
+  }
+
+  deployment_controller {
+    type = "ECS"
+  }
+
+  tags = {
+    Name = "App_Test_Service"
   }
 }
