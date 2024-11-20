@@ -1,7 +1,8 @@
+# Step 2: Configure the Terraform backend with S3
 terraform {
   backend "s3" {
-    bucket = "ashok-tf-state"  # Use a valid S3 bucket name
-    key    = "path/to/terraform.tfstate"
+    bucket = "ashok-tf"  # Use the same bucket name
+    key    = "terraform.tfstate"
     region = "us-east-1"
     encrypt = true
   }
@@ -11,12 +12,12 @@ provider "aws" {
   region = "us-east-1"
 }
 
-# VPC
+# Step 3: VPC Data Source
 data "aws_vpc" "default" {
   default = true
 }
 
-# Default Subnets
+# Step 4: Default Subnets
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
@@ -24,7 +25,7 @@ data "aws_subnets" "default" {
   }
 }
 
-# ECS Cluster
+# Step 5: ECS Cluster
 resource "aws_ecs_cluster" "main" {
   name = "APP_Auto"
 
@@ -36,20 +37,4 @@ resource "aws_ecs_cluster" "main" {
   tags = {
     Name = "APP_ECS_Cluster"
   }
-}
-
-# S3 Bucket for State.
-resource "aws_s3_bucket" "state_bucket" {
-  bucket = "ashok-tf-state-bucket"  # Replace with a valid bucket name
-  acl    = "private"
-
-  tags = {
-    Name = "terraform-state-bucket"
-  }
-}
-
-# Manage ACL separately
-resource "aws_s3_bucket_acl" "state_bucket_acl" {
-  bucket = aws_s3_bucket.state_bucket.id
-  acl    = "private"
 }
