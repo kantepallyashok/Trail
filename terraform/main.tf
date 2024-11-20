@@ -1,23 +1,35 @@
+# Provider Configuration
+provider "aws" {
+  region = "us-east-1"  # Specify the AWS region for all resources
+}
+
+# Backend Configuration
 terraform {
   backend "s3" {
-    bucket = "ashoktf2"  # Replace with your S3 bucket name
+    bucket = "staefile"  # Replace with your S3 bucket name
     key    = "path/to/terraform.tfstate"  # Specify the path for the state file in the bucket
-    region = "us-east-1"                  # Replace with your desired AWS region
-    encrypt = true                        # Enable encryption for the state file (optional but recommended)
+    region = "us-east-1"  # Replace with the region where the S3 bucket will be created
+    encrypt = true        # Enable encryption for the state file (recommended)
   }
 }
 
+# Create S3 Bucket for Terraform State File
+resource "aws_s3_bucket" "state_bucket" {
+  bucket = "statefile"  # Replace with your desired bucket name
+  acl    = "private"
 
-provider "aws" {
-  region = "us-east-1"
+  tags = {
+    Name        = "Terraform State Bucket"
+    Environment = "Dev"
+  }
 }
 
-# VPC
+# VPC Data Source (Default VPC)
 data "aws_vpc" "default" {
   default = true
 }
 
-# Default Subnets
+# Default Subnets Data Source
 data "aws_subnets" "default" {
   filter {
     name   = "vpc-id"
@@ -25,7 +37,7 @@ data "aws_subnets" "default" {
   }
 }
 
-# ECS Cluster
+# ECS Cluster Resource
 resource "aws_ecs_cluster" "main" {
   name = "APP_Auto"
 
