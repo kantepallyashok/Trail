@@ -1,0 +1,80 @@
+name: Build and Deploy to AWS ECR and ECS
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 863518440386
+  IMAGE_NAME: zomato
+  ECS_CLUSTER: zomato-cluster
+  ECS_SERVICE: zomato-service
+  TASK_DEFINITION: zomato-task
+  VPC_ID: vpc-0ab1d87e367c4d32b
+  SUBNET_IDS: '["subnet-0b9f589e6ac273269", "subnet-0b09e180ef9f3c96e", "subnet-0d4b1308ddb953a5f"]'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Login to AWS ECR.
+      # Step 2: Login to AWS ECR
+      - name: Login to AWS ECR
+        uses: aws-actions/amazon-ecr-login@v1
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      # Build Docker image
+      - name: Build Docker Image
+        run: |
+          docker build -t $IMAGE_NAME:latest .
+
+      # Tag Docker image
+      - name: Tag Docker Image
+        run: |
+          docker tag $IMAGE_NAME:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
+
+      # Push Docker image to AWS ECR
+      - name: Push Docker image to AWS ECR
+        run: |
+          docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest
+
+      # Setup Terraform
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          terraform_version: 1.5.4
+
+      # Terraform Init
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init -backend-config="bucket=my-terraform-state" \
+                         -backend-config="key=terraform/state.tfstate" \
+                         -backend-config="region=$AWS_REGION" \
+                         -backend-config="dynamodb_table=terraform-locks"
+
+      # Terraform Plan
+      - name: Terraform Plan
+        run: |
+          cd terraform
+          terraform plan -var="aws_region=$AWS_REGION" \
+                         -var="ecs_cluster=$ECS_CLUSTER" \
+                         -var="ecs_service=$ECS_SERVICE" \
+                         -var="task_definition=$TASK_DEFINITION" \
+                         -var="image_name=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$IMAGE_NAME:latest" \
+                         -out=tfplan
+
+      # Terraform Apply
+      - name: Terraform Apply
+        run: |
+          cd terraform
+          terraform apply -auto-approve tfplan
