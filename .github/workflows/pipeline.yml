@@ -41,8 +41,10 @@ jobs:
       - name: Get default Subnet IDs
         id: subnet_ids
         run: |
-          export SUBNET_IDS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID --query 'Subnets[*].SubnetId' --output json --region $AWS_REGION)
+          # Get Subnet IDs as a space-separated list
+          export SUBNET_IDS=$(aws ec2 describe-subnets --filters Name=vpc-id,Values=$VPC_ID --query 'Subnets[*].SubnetId' --output text --region $AWS_REGION)
           echo "SUBNET_IDS=$SUBNET_IDS" >> $GITHUB_ENV
+
 
       # Check if the ECR repository exists, if not create it
       - name: Create ECR Repository if not exists
